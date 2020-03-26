@@ -1,6 +1,8 @@
 package proxmox
 
 import (
+	"encoding/json"
+	"fmt"
 	"strconv"
 	pxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -68,4 +70,13 @@ func RemoveIds(configSet *schema.Set) *schema.Set {
 		configSet.Add(setConfMap)
 	}
 	return configSet
+}
+
+// TODO for debug
+func PrettyPrint(v interface{}) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("%#v", v)
+	}
+	return string(b)
 }
