@@ -392,6 +392,8 @@ var rxIPconfig = regexp.MustCompile("ip6?=([0-9a-fA-F:\\.]+)")
 func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 	pconf := meta.(*providerConfiguration)
 	pmParallelBegin(pconf)
+	defer pmParallelEnd(pconf)
+
 	client := pconf.Client
 	vmName := d.Get("name").(string)
 	vga := d.Get("vga").(*schema.Set)
@@ -448,10 +450,8 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 	pool := d.Get("pool").(string)
 
 	if dupVmr != nil && forceCreate {
-		pmParallelEnd(pconf)
 		return fmt.Errorf("Duplicate VM name (%s) with vmId: %d. Set force_create=false to recycle", vmName, dupVmr.VmId())
 	} else if dupVmr != nil && dupVmr.Node() != targetNode {
-		pmParallelEnd(pconf)
 		return fmt.Errorf("Duplicate VM name (%s) with vmId: %d on different target_node=%s", vmName, dupVmr.VmId(), dupVmr.Node())
 	}
 
@@ -461,7 +461,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 		// get unique id
 		nextid, err := nextVmId(pconf)
 		if err != nil {
-			pmParallelEnd(pconf)
 			return err
 		}
 		vmr = pxapi.NewVmRef(nextid)
@@ -482,14 +481,12 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 
 			sourceVmr, err := client.GetVmRefByName(d.Get("clone").(string))
 			if err != nil {
-				pmParallelEnd(pconf)
 				return err
 			}
 			log.Print("[DEBUG] cloning VM")
 			err = config.CloneVm(sourceVmr, vmr, client)
 
 			if err != nil {
-				pmParallelEnd(pconf)
 				return err
 			}
 
@@ -497,7 +494,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				// Set the id because when update config fail the vm is still created
 				d.SetId(resourceId(targetNode, "qemu", vmr.VmId()))
-				pmParallelEnd(pconf)
 				return err
 			}
 
@@ -506,7 +502,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 
 			err = prepareDiskSize(client, vmr, qemuDisks)
 			if err != nil {
-				pmParallelEnd(pconf)
 				return err
 			}
 
@@ -514,7 +509,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 			config.QemuIso = d.Get("iso").(string)
 			err := config.CreateVm(vmr, client)
 			if err != nil {
-				pmParallelEnd(pconf)
 				return err
 			}
 		} else {
@@ -529,7 +523,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 		if err != nil {
 			// Set the id because when update config fail the vm is still created
 			d.SetId(resourceId(targetNode, "qemu", vmr.VmId()))
-			pmParallelEnd(pconf)
 			return err
 		}
 
@@ -538,7 +531,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 
 		err = prepareDiskSize(client, vmr, qemuDisks)
 		if err != nil {
-			pmParallelEnd(pconf)
 			return err
 		}
 	}
@@ -550,7 +542,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Print("[DEBUG] starting VM")
 	_, err := client.StartVm(vmr)
 	if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 
@@ -560,16 +551,16 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 	pconf := meta.(*providerConfiguration)
 	pmParallelBegin(pconf)
+	defer pmParallelEnd(pconf);
+
 	client := pconf.Client
 	_, _, vmID, err := parseResourceId(d.Id())
 	if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 	vmr := pxapi.NewVmRef(vmID)
 	_, err = client.GetVmInfo(vmr)
 	if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 	configDisksSet := d.Get("disk").(*schema.Set)
@@ -585,7 +576,6 @@ func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("target_node") {
 		_, err := client.MigrateNode(vmr, d.Get("target_node").(string), true)
 		if err != nil {
-			pmParallelEnd(pconf)
 			return err
 		}
 		d.SetPartial("target_node")
@@ -633,7 +623,6 @@ func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	err = config.UpdateConfig(vmr, client)
 	if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 
@@ -642,6 +631,7 @@ func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	prepareDiskSize(client, vmr, qemuDisks)
 
+	// TODO: poll proxmox with timeout
 	// give sometime to proxmox to catchup
 	time.Sleep(15 * time.Second)
 
@@ -651,34 +641,30 @@ func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Print("[DEBUG] starting VM")
 		_, err = client.StartVm(vmr)
 	} else if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 
-	// give sometime to bootup
-	time.Sleep(9 * time.Second)
 	return nil
 }
 
 func resourceVmQemuRead(d *schema.ResourceData, meta interface{}) error {
 	pconf := meta.(*providerConfiguration)
 	pmParallelBegin(pconf)
+	defer pmParallelEnd(pconf)
+
 	client := pconf.Client
 	_, _, vmID, err := parseResourceId(d.Id())
 	if err != nil {
-		pmParallelEnd(pconf)
 		d.SetId("")
 		return err
 	}
 	vmr := pxapi.NewVmRef(vmID)
 	_, err = client.GetVmInfo(vmr)
 	if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 	config, err := pxapi.NewConfigQemuFromApi(vmr, client)
 	if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 	d.SetId(resourceId(vmr.Node(), "qemu", vmr.VmId()))
@@ -731,25 +717,24 @@ func resourceVmQemuRead(d *schema.ResourceData, meta interface{}) error {
 	activeSerialSet := UpdateDevicesSet(configSerialsSet, config.QemuSerials)
 	d.Set("serial", activeSerialSet)
 
-	pmParallelEnd(pconf)
 	return nil
 }
 
 func resourceVmQemuDelete(d *schema.ResourceData, meta interface{}) error {
 	pconf := meta.(*providerConfiguration)
 	pmParallelBegin(pconf)
+	defer pmParallelEnd(pconf)
+
 	client := pconf.Client
 	vmId, _ := strconv.Atoi(path.Base(d.Id()))
 	vmr := pxapi.NewVmRef(vmId)
 	_, err := client.StopVm(vmr)
 	if err != nil {
-		pmParallelEnd(pconf)
 		return err
 	}
 	// give sometime to proxmox to catchup
 	time.Sleep(2 * time.Second)
 	_, err = client.DeleteVm(vmr)
-	pmParallelEnd(pconf)
 	return err
 }
 
