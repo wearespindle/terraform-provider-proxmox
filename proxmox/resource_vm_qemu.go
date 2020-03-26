@@ -161,7 +161,6 @@ func resourceVmQemu() *schema.Resource {
 			"network": &schema.Schema{
 				Type:          schema.TypeSet,
 				Optional:      true,
-				ConflictsWith: []string{"nic", "bridge", "vlan", "mac"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": &schema.Schema{
@@ -215,7 +214,6 @@ func resourceVmQemu() *schema.Resource {
 			"disk": &schema.Schema{
 				Type:          schema.TypeSet,
 				Optional:      true,
-				ConflictsWith: []string{"disk_gb", "storage", "storage_type"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": &schema.Schema{
@@ -293,63 +291,6 @@ func resourceVmQemu() *schema.Resource {
 					},
 				},
 			},
-			// Deprecated single disk config.
-			"disk_gb": {
-				Type:       schema.TypeFloat,
-				Deprecated: "Use `disk.size` instead",
-				Optional:   true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// bigger ok
-					oldf, _ := strconv.ParseFloat(old, 64)
-					newf, _ := strconv.ParseFloat(new, 64)
-					return oldf >= newf
-				},
-			},
-			"storage": {
-				Type:       schema.TypeString,
-				Deprecated: "Use `disk.storage` instead",
-				Optional:   true,
-			},
-			"storage_type": {
-				Type:       schema.TypeString,
-				Deprecated: "Use `disk.type` instead",
-				Optional:   true,
-				ForceNew:   false,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if new == "" {
-						return true // empty template ok
-					}
-					return strings.TrimSpace(old) == strings.TrimSpace(new)
-				},
-			},
-			// Deprecated single nic config.
-			"nic": {
-				Type:       schema.TypeString,
-				Deprecated: "Use `network` instead",
-				Optional:   true,
-			},
-			"bridge": {
-				Type:       schema.TypeString,
-				Deprecated: "Use `network.bridge` instead",
-				Optional:   true,
-			},
-			"vlan": {
-				Type:       schema.TypeInt,
-				Deprecated: "Use `network.tag` instead",
-				Optional:   true,
-				Default:    -1,
-			},
-			"mac": {
-				Type:       schema.TypeString,
-				Deprecated: "Use `network.macaddr` to access the auto generated MAC address",
-				Optional:   true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if new == "" {
-						return true // macaddr auto-generates and its ok
-					}
-					return strings.TrimSpace(old) == strings.TrimSpace(new)
-				},
-			},
 			"serial": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -374,23 +315,6 @@ func resourceVmQemu() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return strings.TrimSpace(old) == strings.TrimSpace(new)
-				},
-			},
-			"ssh_forward_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"ssh_user": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"ssh_private_key": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return strings.TrimSpace(old) == strings.TrimSpace(new)
 				},
@@ -455,23 +379,9 @@ func resourceVmQemu() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"preprovision": {
-				Type:          schema.TypeBool,
-				Optional:      true,
-				Default:       true,
-				ConflictsWith: []string{"ssh_forward_ip", "ssh_user", "ssh_private_key", "os_type", "os_network_config"},
-			},
 			"pool": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-			"ssh_host": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"ssh_port": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 		},
 	}
@@ -526,14 +436,6 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 		Ipconfig0:    d.Get("ipconfig0").(string),
 		Ipconfig1:    d.Get("ipconfig1").(string),
 		Ipconfig2:    d.Get("ipconfig2").(string),
-		// Deprecated single disk config.
-		Storage:  d.Get("storage").(string),
-		DiskSize: d.Get("disk_gb").(float64),
-		// Deprecated single nic config.
-		QemuNicModel: d.Get("nic").(string),
-		QemuBrige:    d.Get("bridge").(string),
-		QemuVlanTag:  d.Get("vlan").(int),
-		QemuMacAddr:  d.Get("mac").(string),
 	}
 	if len(qemuVgaList) > 0 {
 		config.QemuVga = qemuVgaList[0].(map[string]interface{})
@@ -724,14 +626,6 @@ func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 		Ipconfig0:    d.Get("ipconfig0").(string),
 		Ipconfig1:    d.Get("ipconfig1").(string),
 		Ipconfig2:    d.Get("ipconfig2").(string),
-		// Deprecated single disk config.
-		Storage:  d.Get("storage").(string),
-		DiskSize: d.Get("disk_gb").(float64),
-		// Deprecated single nic config.
-		QemuNicModel: d.Get("nic").(string),
-		QemuBrige:    d.Get("bridge").(string),
-		QemuVlanTag:  d.Get("vlan").(int),
-		QemuMacAddr:  d.Get("mac").(string),
 	}
 	if len(qemuVgaList) > 0 {
 		config.QemuVga = qemuVgaList[0].(map[string]interface{})
@@ -831,15 +725,6 @@ func resourceVmQemuRead(d *schema.ResourceData, meta interface{}) error {
 	configNetworksSet := d.Get("network").(*schema.Set)
 	activeNetworksSet := UpdateDevicesSet(configNetworksSet, config.QemuNetworks)
 	d.Set("network", activeNetworksSet)
-	// Deprecated single disk config.
-	d.Set("storage", config.Storage)
-	d.Set("disk_gb", config.DiskSize)
-	d.Set("storage_type", config.StorageType)
-	// Deprecated single nic config.
-	d.Set("nic", config.QemuNicModel)
-	d.Set("bridge", config.QemuBrige)
-	d.Set("vlan", config.QemuVlanTag)
-	d.Set("mac", config.QemuMacAddr)
 	d.Set("pool", vmr.Pool())
 	//Serials
 	configSerialsSet := d.Get("serial").(*schema.Set)
