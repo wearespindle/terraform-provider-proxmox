@@ -392,7 +392,7 @@ func flattenVmQemu(vmr *pxapi.VmRef, config *pxapi.ConfigQemu, d *schema.Resourc
 
 	// Disks.
 	configDisksSet := d.Get("disk").(*schema.Set)
-	activeDisksSet := flattenDevices(d.Get("disk").(*schema.Set), config.QemuDisks)
+	activeDisksSet := flattenDevices(configDisksSet, config.QemuDisks)
 	d.Set("disk", activeDisksSet)
 
 	// Display.
