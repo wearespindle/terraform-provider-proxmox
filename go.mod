@@ -1,4 +1,4 @@
-module github.com/Telmate/terraform-provider-proxmox
+module github.com/wearespindle/terraform-provider-proxmox
 
 go 1.14
 

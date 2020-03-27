@@ -487,9 +487,6 @@ func expandVmQemu(d *schema.ResourceData) pxapi.ConfigQemu {
 		Scsihw:       d.Get("scsihw").(string),
 		HaState:      d.Get("hastate").(string),
 		QemuOs:       d.Get("qemu_os").(string),
-		QemuNetworks: expandDevices(d.Get("network").(*schema.Set)),
-		QemuDisks:    expandDevices(d.Get("disk").(*schema.Set)),
-		QemuSerials:  expandDevices(d.Get("serial").(*schema.Set)),
 		// Cloud-init.
 		CIuser:       d.Get("ciuser").(string),
 		CIpassword:   d.Get("cipassword").(string),
@@ -500,6 +497,10 @@ func expandVmQemu(d *schema.ResourceData) pxapi.ConfigQemu {
 		Ipconfig0:    d.Get("ipconfig0").(string),
 		Ipconfig1:    d.Get("ipconfig1").(string),
 		Ipconfig2:    d.Get("ipconfig2").(string),
+
+		QemuNetworks: expandDevices(d.Get("network").(*schema.Set)),
+		QemuDisks:    expandDevices(d.Get("disk").(*schema.Set)),
+		QemuSerials:  expandDevices(d.Get("serial").(*schema.Set)),
 	}
 
 	vga := d.Get("vga").(*schema.Set)
