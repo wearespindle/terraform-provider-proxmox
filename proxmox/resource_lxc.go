@@ -531,7 +531,7 @@ func resourceLxcRead(d *schema.ResourceData, meta interface{}) error {
 
 	defaultFeatures := d.Get("features").(*schema.Set)
 	if len(defaultFeatures.List()) > 0 {
-		featuresWithDefaults := UpdateDeviceConfDefaults(config.Features, defaultFeatures)
+		featuresWithDefaults := updateDeviceConfDefaults(config.Features, defaultFeatures)
 		d.Set("features", featuresWithDefaults)
 	}
 
@@ -545,7 +545,7 @@ func resourceLxcRead(d *schema.ResourceData, meta interface{}) error {
 	configMountpointSet := d.Get("mountpoint").(*schema.Set)
 	configMountpointSet = AddIds(configMountpointSet)
 	if len(configMountpointSet.List()) > 0 {
-		activeMountpointSet := UpdateDevicesSet(configMountpointSet, config.Mountpoints)
+		activeMountpointSet := flattenDevices(configMountpointSet, config.Mountpoints)
 		activeMountpointSet = RemoveIds(activeMountpointSet)
 		d.Set("mountpoint", activeMountpointSet)
 	}
@@ -555,7 +555,7 @@ func resourceLxcRead(d *schema.ResourceData, meta interface{}) error {
 	configNetworksSet := d.Get("network").(*schema.Set)
 	configNetworksSet = AddIds(configNetworksSet)
 	if len(configNetworksSet.List()) > 0 {
-		activeNetworksSet := UpdateDevicesSet(configNetworksSet, config.Networks)
+		activeNetworksSet := flattenDevices(configNetworksSet, config.Networks)
 		activeNetworksSet = RemoveIds(activeNetworksSet)
 		d.Set("network", activeNetworksSet)
 	}

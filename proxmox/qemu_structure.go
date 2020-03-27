@@ -1,7 +1,6 @@
 package proxmox
 
 import (
-	"strconv"
 	"strings"
 
 	pxapi "github.com/Telmate/proxmox-api-go/proxmox"
@@ -9,66 +8,67 @@ import (
 )
 
 var resourceQemuSchema = map[string]*schema.Schema{
-	"name": {
+	"name": &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 	},
-	"desc": {
+	"desc": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return strings.TrimSpace(old) == strings.TrimSpace(new)
 		},
 	},
-	"target_node": {
+	"target_node": &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 	},
-	"bios": {
+	"bios": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		Default:  "seabios",
 	},
-	"onboot": {
+	"onboot": &schema.Schema{
 		Type:     schema.TypeBool,
 		Optional: true,
 		Default:  true,
 	},
-	"boot": {
+	"boot": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		Default:  "cdn",
 	},
-	"bootdisk": {
+	"bootdisk": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
+		Computed: true,
 	},
-	"agent": {
+	"agent": &schema.Schema{
 		Type:     schema.TypeInt,
 		Optional: true,
 		Default:  0,
 	},
-	"iso": {
+	"iso": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		ForceNew: true,
 	},
-	"clone": {
+	"clone": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		ForceNew: true,
 	},
-	"full_clone": {
+	"full_clone": &schema.Schema{
 		Type:     schema.TypeBool,
 		Optional: true,
 		ForceNew: true,
 		Default:  true,
 	},
-	"hastate": {
+	"hastate": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"qemu_os": {
+	"qemu_os": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		Default:  "l26",
@@ -79,50 +79,50 @@ var resourceQemuSchema = map[string]*schema.Schema{
 			return strings.TrimSpace(old) == strings.TrimSpace(new)
 		},
 	},
-	"memory": {
+	"memory": &schema.Schema{
 		Type:     schema.TypeInt,
 		Optional: true,
 		Default:  512,
 	},
-	"balloon": {
+	"balloon": &schema.Schema{
 		Type:     schema.TypeInt,
 		Optional: true,
 		Default:  0,
 	},
-	"cores": {
+	"cores": &schema.Schema{
 		Type:     schema.TypeInt,
 		Optional: true,
 		Default:  1,
 	},
-	"sockets": {
+	"sockets": &schema.Schema{
 		Type:     schema.TypeInt,
 		Optional: true,
 		Default:  1,
 	},
-	"vcpus": {
+	"vcpus": &schema.Schema{
 		Type:     schema.TypeInt,
 		Optional: true,
 		Default:  0,
 	},
-	"cpu": {
+	"cpu": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		Default:  "host",
 	},
-	"numa": {
+	"numa": &schema.Schema{
 		Type:     schema.TypeBool,
 		Optional: true,
 		Default:  false,
 	},
-	"hotplug": {
+	"hotplug": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		Default:  "network,disk,usb",
 	},
-	"scsihw": {
+	"scsihw": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
-		Default:  "",
+		Computed: true,
 	},
 	"vga": &schema.Schema{
 		Type:     schema.TypeSet,
@@ -155,9 +155,7 @@ var resourceQemuSchema = map[string]*schema.Schema{
 					Required: true,
 				},
 				"macaddr": &schema.Schema{
-					// TODO: Find a way to set MAC address in .tf config.
 					Type:     schema.TypeString,
-					Optional: true,
 					Computed: true,
 				},
 				"bridge": &schema.Schema{
@@ -290,11 +288,11 @@ var resourceQemuSchema = map[string]*schema.Schema{
 			},
 		},
 	},
-	"os_type": {
+	"os_type": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"os_network_config": {
+	"os_network_config": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		ForceNew: true,
@@ -302,67 +300,56 @@ var resourceQemuSchema = map[string]*schema.Schema{
 			return strings.TrimSpace(old) == strings.TrimSpace(new)
 		},
 	},
-	"force_create": {
+	"force_create": &schema.Schema{
 		Type:     schema.TypeBool,
 		Optional: true,
 		Default:  false,
 	},
-	"clone_wait": {
+	"clone_wait": &schema.Schema{
 		Type:     schema.TypeInt,
 		Optional: true,
 		Default:  15,
 	},
-	"ci_wait": { // how long to wait before provision
-		Type:     schema.TypeInt,
-		Optional: true,
-		Default:  30,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			if old == "" {
-				return true // old empty ok
-			}
-			return strings.TrimSpace(old) == strings.TrimSpace(new)
-		},
-	},
-	"ciuser": {
+	"ciuser": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"cipassword": {
+	"cipassword": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"cicustom": {
+	"cicustom": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"searchdomain": {
+	"searchdomain": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"nameserver": {
+	"nameserver": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"sshkeys": {
+	"sshkeys": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			return strings.TrimSpace(old) == strings.TrimSpace(new)
 		},
 	},
-	"ipconfig0": {
+	"ipconfig0": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"ipconfig1": {
+	"ipconfig1": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"ipconfig2": {
+	"ipconfig2": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
-	"pool": {
+	"pool": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
@@ -390,6 +377,8 @@ func flattenVmQemu(vmr *pxapi.VmRef, config *pxapi.ConfigQemu, d *schema.Resourc
 	d.Set("scsihw", config.Scsihw)
 	d.Set("hastate", vmr.HaState())
 	d.Set("qemu_os", config.QemuOs)
+	d.Set("pool", vmr.Pool())
+
 	// Cloud-init.
 	d.Set("ciuser", config.CIuser)
 	d.Set("cipassword", config.CIpassword)
@@ -400,30 +389,32 @@ func flattenVmQemu(vmr *pxapi.VmRef, config *pxapi.ConfigQemu, d *schema.Resourc
 	d.Set("ipconfig0", config.Ipconfig0)
 	d.Set("ipconfig1", config.Ipconfig1)
 	d.Set("ipconfig2", config.Ipconfig2)
+
 	// Disks.
 	configDisksSet := d.Get("disk").(*schema.Set)
-	activeDisksSet := UpdateDevicesSet(configDisksSet, config.QemuDisks)
+	activeDisksSet := flattenDevices(d.Get("disk").(*schema.Set), config.QemuDisks)
 	d.Set("disk", activeDisksSet)
+
 	// Display.
 	activeVgaSet := d.Get("vga").(*schema.Set)
 	if len(activeVgaSet.List()) > 0 {
-		d.Set("features", UpdateDeviceConfDefaults(config.QemuVga, activeVgaSet))
+		d.Set("features", updateDeviceConfDefaults(config.QemuVga, activeVgaSet))
 	}
+
 	// Networks.
 	configNetworksSet := d.Get("network").(*schema.Set)
-	activeNetworksSet := UpdateDevicesSet(configNetworksSet, config.QemuNetworks)
+	activeNetworksSet := flattenDevices(configNetworksSet, config.QemuNetworks)
 	d.Set("network", activeNetworksSet)
-	d.Set("pool", vmr.Pool())
+
 	//Serials
 	configSerialsSet := d.Get("serial").(*schema.Set)
-	activeSerialSet := UpdateDevicesSet(configSerialsSet, config.QemuSerials)
+	activeSerialSet := flattenDevices(configSerialsSet, config.QemuSerials)
 	d.Set("serial", activeSerialSet)
 }
 
 // Converting from schema.TypeSet to map of id and conf for each device,
 // which will be sent to Proxmox API.
-func DevicesSetToMap(devicesSet *schema.Set) pxapi.QemuDevices {
-
+func expandDevices(devicesSet *schema.Set) pxapi.QemuDevices {
 	devicesMap := pxapi.QemuDevices{}
 
 	for _, set := range devicesSet.List() {
@@ -437,46 +428,18 @@ func DevicesSetToMap(devicesSet *schema.Set) pxapi.QemuDevices {
 }
 
 // Update schema.TypeSet with new values comes from Proxmox API.
-// TODO: Maybe it's better to create a new Set instead add to current one.
-func UpdateDevicesSet(
-	devicesSet *schema.Set,
-	devicesMap pxapi.QemuDevices,
-) *schema.Set {
-
-	configDevicesMap := DevicesSetToMap(devicesSet)
-
+func flattenDevices(devicesSet *schema.Set, devicesMap pxapi.QemuDevices) *schema.Set {
+	configDevicesMap := expandDevices(devicesSet)
 	activeDevicesMap := updateDevicesDefaults(devicesMap, configDevicesMap)
 
 	for _, setConf := range devicesSet.List() {
 		devicesSet.Remove(setConf)
 		setConfMap := setConf.(map[string]interface{})
 		deviceID := setConfMap["id"].(int)
-		// Value type should be one of types allowed by Terraform schema types.
 		for key, value := range activeDevicesMap[deviceID] {
-			// This nested switch is used for nested config like in `net[n]`,
-			// where Proxmox uses `key=<0|1>` in string" at the same time
-			// a boolean could be used in ".tf" files.
-			switch setConfMap[key].(type) {
-			case bool:
-				switch value.(type) {
-				// If the key is bool and value is int (which comes from Proxmox API),
-				// should be converted to bool (as in ".tf" conf).
-				case int:
-					sValue := strconv.Itoa(value.(int))
-					bValue, err := strconv.ParseBool(sValue)
-					if err == nil {
-						setConfMap[key] = bValue
-					}
-				// If value is bool, which comes from Terraform conf, add it directly.
-				case bool:
-					setConfMap[key] = value
-				}
-			// Anything else will be added as it is.
-			default:
-				setConfMap[key] = value
-			}
-			devicesSet.Add(setConfMap)
+			setConfMap[key] = value
 		}
+		devicesSet.Add(setConfMap)
 	}
 
 	return devicesSet
@@ -504,18 +467,8 @@ func updateDevicesDefaults(
 }
 
 func expandVmQemu(d *schema.ResourceData) pxapi.ConfigQemu {
-	vmName := d.Get("name").(string)
-	vga := d.Get("vga").(*schema.Set)
-	qemuVgaList := vga.List()
-	networks := d.Get("network").(*schema.Set)
-	qemuNetworks := DevicesSetToMap(networks)
-	disks := d.Get("disk").(*schema.Set)
-	qemuDisks := DevicesSetToMap(disks)
-	serials := d.Get("serial").(*schema.Set)
-	qemuSerials := DevicesSetToMap(serials)
-
 	config := pxapi.ConfigQemu{
-		Name:         vmName,
+		Name:         d.Get("name").(string),
 		Description:  d.Get("desc").(string),
 		Pool:         d.Get("pool").(string),
 		Bios:         d.Get("bios").(string),
@@ -534,9 +487,9 @@ func expandVmQemu(d *schema.ResourceData) pxapi.ConfigQemu {
 		Scsihw:       d.Get("scsihw").(string),
 		HaState:      d.Get("hastate").(string),
 		QemuOs:       d.Get("qemu_os").(string),
-		QemuNetworks: qemuNetworks,
-		QemuDisks:    qemuDisks,
-		QemuSerials:  qemuSerials,
+		QemuNetworks: expandDevices(d.Get("network").(*schema.Set)),
+		QemuDisks:    expandDevices(d.Get("disk").(*schema.Set)),
+		QemuSerials:  expandDevices(d.Get("serial").(*schema.Set)),
 		// Cloud-init.
 		CIuser:       d.Get("ciuser").(string),
 		CIpassword:   d.Get("cipassword").(string),
@@ -548,6 +501,10 @@ func expandVmQemu(d *schema.ResourceData) pxapi.ConfigQemu {
 		Ipconfig1:    d.Get("ipconfig1").(string),
 		Ipconfig2:    d.Get("ipconfig2").(string),
 	}
+
+	vga := d.Get("vga").(*schema.Set)
+	qemuVgaList := vga.List()
+
 	if len(qemuVgaList) > 0 {
 		config.QemuVga = qemuVgaList[0].(map[string]interface{})
 	}

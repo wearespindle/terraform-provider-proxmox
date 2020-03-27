@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func UpdateDeviceConfDefaults(
+func updateDeviceConfDefaults(
 	activeDeviceConf pxapi.QemuDevice,
 	defaultDeviceConf *schema.Set,
 ) *schema.Set {
