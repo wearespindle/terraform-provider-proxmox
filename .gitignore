@@ -4,3 +4,4 @@ examples/*_override.tf
 *~*
 *.bak
 bin
+dist
