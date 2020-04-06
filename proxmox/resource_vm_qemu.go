@@ -148,7 +148,7 @@ func resourceVmQemuCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceVmQemuUpdate(d *schema.ResourceData, meta interface{}) error {
 	pconf := meta.(*providerConfiguration)
 	pmParallelBegin(pconf)
-	defer pmParallelEnd(pconf);
+	defer pmParallelEnd(pconf)
 
 	client := pconf.Client
 	_, _, vmID, err := parseResourceId(d.Id())
@@ -307,4 +307,3 @@ func diskSizeGB(dcSize interface{}) float64 {
 	}
 	return diskSize
 }
-

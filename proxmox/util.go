@@ -3,9 +3,9 @@ package proxmox
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	pxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"strconv"
 )
 
 func updateDeviceConfDefaults(

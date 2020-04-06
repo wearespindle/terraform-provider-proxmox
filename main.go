@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/wearespindle/terraform-provider-proxmox/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/wearespindle/terraform-provider-proxmox/proxmox"
 )
 
 func main() {
