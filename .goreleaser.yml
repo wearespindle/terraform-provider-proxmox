@@ -2,8 +2,7 @@ before:
   hooks:
     - go mod download
 builds:
-- env:
-  - CGO_ENABLED=0
+- binary: "terraform-provider-proxmox_{{.Tag}}"
   goos:
     - linux
     - darwin
@@ -11,6 +10,13 @@ builds:
   goarch:
     - 386
     - amd64
+  env:
+    - CGO_ENABLED=0
+archives:
+- format: gz
+  files:
+    - none*
+  name_template: "{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
 checksum:
   name_template: 'checksums.txt'
 snapshot:
