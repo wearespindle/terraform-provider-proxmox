@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"sync"
 
-	pxapi "github.com/wearespindle/proxmox-api-go/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	pxapi "github.com/wearespindle/proxmox-api-go/proxmox"
 )
 
 type providerConfiguration struct {
@@ -105,7 +105,7 @@ func getClient(pm_api_url string, pm_user string, pm_password string, pm_otp str
 	if !pm_tls_insecure {
 		tlsconf = nil
 	}
-	client, _ := pxapi.NewClient(pm_api_url, nil, tlsconf)
+	client, _ := pxapi.NewClient(pm_api_url, nil, tlsconf, 300)
 	err := client.Login(pm_user, pm_password, pm_otp)
 	if err != nil {
 		return nil, err

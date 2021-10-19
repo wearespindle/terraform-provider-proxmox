@@ -1,8 +1,8 @@
 package proxmox
 
 import (
-	pxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	pxapi "github.com/wearespindle/proxmox-api-go/proxmox"
 )
 
 func resourceLxc() *schema.Resource {
@@ -357,7 +357,7 @@ func resourceLxcCreate(d *schema.ResourceData, meta interface{}) error {
 	config.Pool = d.Get("pool").(string)
 	config.Protection = d.Get("protection").(bool)
 	config.Restore = d.Get("restore").(bool)
-	config.RootFs = d.Get("rootfs").(string)
+	config.RootFs = d.Get("rootfs").(pxapi.QemuDevice)
 	config.SearchDomain = d.Get("searchdomain").(string)
 	config.SSHPublicKeys = d.Get("ssh_public_keys").(string)
 	config.Start = d.Get("start").(bool)
@@ -467,7 +467,7 @@ func resourceLxcUpdate(d *schema.ResourceData, meta interface{}) error {
 	config.Pool = d.Get("pool").(string)
 	config.Protection = d.Get("protection").(bool)
 	config.Restore = d.Get("restore").(bool)
-	config.RootFs = d.Get("rootfs").(string)
+	config.RootFs = d.Get("rootfs").(pxapi.QemuDevice)
 	config.SearchDomain = d.Get("searchdomain").(string)
 	config.SSHPublicKeys = d.Get("ssh_public_keys").(string)
 	config.Start = d.Get("start").(bool)
