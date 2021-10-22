@@ -3,7 +3,6 @@ module github.com/Telmate/terraform-provider-proxmox
 go 1.16
 
 require (
-	github.com/Telmate/proxmox-api-go v0.0.0-20211018194246-01db3aef02b5
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -20,6 +19,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rs/zerolog v1.25.0
+	github.com/wearespindle/proxmox-api-go v0.0.0-20211019080243-dfeae1ab060f
 	github.com/zclconf/go-cty v1.9.1 // indirect
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect

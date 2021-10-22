@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	pxapi "github.com/Telmate/proxmox-api-go/proxmox"
+	pxapi "github.com/wearespindle/proxmox-api-go/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -112,6 +112,10 @@ func resourceLxc() *schema.Resource {
 				Optional: true,
 			},
 			"hastate": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"hagroup": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -431,6 +435,7 @@ func resourceLxcCreate(d *schema.ResourceData, meta interface{}) error {
 	config.Force = d.Get("force").(bool)
 	config.Full = d.Get("full").(bool)
 	config.HaState = d.Get("hastate").(string)
+	config.HaGroup = d.Get("hagroup").(string)
 	config.Hookscript = d.Get("hookscript").(string)
 	config.Hostname = d.Get("hostname").(string)
 	config.IgnoreUnpackErrors = d.Get("ignore_unpack_errors").(bool)
@@ -579,6 +584,7 @@ func resourceLxcUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	config.Force = d.Get("force").(bool)
 	config.HaState = d.Get("hastate").(string)
+	config.HaGroup = d.Get("hagroup").(string)
 	config.Hookscript = d.Get("hookscript").(string)
 	config.Hostname = d.Get("hostname").(string)
 	config.IgnoreUnpackErrors = d.Get("ignore_unpack_errors").(bool)
@@ -770,6 +776,7 @@ func _resourceLxcRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("description", config.Description)
 	d.Set("force", config.Force)
 	d.Set("hastate", vmr.HaState)
+	d.Set("hagroup", vmr.HaGroup)
 	d.Set("hookscript", config.Hookscript)
 	d.Set("hostname", config.Hostname)
 	d.Set("ignore_unpack_errors", config.IgnoreUnpackErrors)
