@@ -334,6 +334,11 @@ var resourceQemuSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
+	"kvm": {
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  true,
+	},
 	"sshkeys": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
@@ -377,6 +382,7 @@ func flattenVmQemu(vmr *pxapi.VmRef, config *pxapi.ConfigQemu, d *schema.Resourc
 	d.Set("vcpus", config.QemuVcpus)
 	d.Set("cpu", config.QemuCpu)
 	d.Set("numa", config.QemuNuma)
+	d.Set("kvm", config.QemuKVM)
 	d.Set("hotplug", config.Hotplug)
 	d.Set("scsihw", config.Scsihw)
 	d.Set("hastate", vmr.HaState())
@@ -488,6 +494,7 @@ func expandVmQemu(d *schema.ResourceData) pxapi.ConfigQemu {
 		QemuVcpus:   d.Get("vcpus").(int),
 		QemuCpu:     d.Get("cpu").(string),
 		QemuNuma:    d.Get("numa").(bool),
+		QemuKVM: d.Get("kvm").(bool),
 		Hotplug:     d.Get("hotplug").(string),
 		Scsihw:      d.Get("scsihw").(string),
 		HaState:     d.Get("hastate").(string),
