@@ -3,8 +3,8 @@ package proxmox
 import (
 	"strings"
 
-	pxapi "github.com/wearespindle/proxmox-api-go/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	pxapi "github.com/wearespindle/proxmox-api-go/proxmox"
 )
 
 var resourceQemuSchema = map[string]*schema.Schema{
@@ -65,6 +65,10 @@ var resourceQemuSchema = map[string]*schema.Schema{
 		Default:  true,
 	},
 	"hastate": &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"hagroup": &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
@@ -376,6 +380,7 @@ func flattenVmQemu(vmr *pxapi.VmRef, config *pxapi.ConfigQemu, d *schema.Resourc
 	d.Set("hotplug", config.Hotplug)
 	d.Set("scsihw", config.Scsihw)
 	d.Set("hastate", vmr.HaState())
+	d.Set("hagroup", vmr.HaGroup())
 	d.Set("qemu_os", config.QemuOs)
 	d.Set("pool", vmr.Pool())
 
@@ -486,6 +491,7 @@ func expandVmQemu(d *schema.ResourceData) pxapi.ConfigQemu {
 		Hotplug:     d.Get("hotplug").(string),
 		Scsihw:      d.Get("scsihw").(string),
 		HaState:     d.Get("hastate").(string),
+		HaGroup:     d.Get("hagroup").(string),
 		QemuOs:      d.Get("qemu_os").(string),
 		// Cloud-init.
 		CIuser:       d.Get("ciuser").(string),
