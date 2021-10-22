@@ -1,4 +1,4 @@
-module github.com/Telmate/terraform-provider-proxmox
+module github.com/wearespindle/terraform-provider-proxmox
 
 go 1.16
 
@@ -19,7 +19,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rs/zerolog v1.25.0
-	github.com/wearespindle/proxmox-api-go v0.0.0-20211019080243-dfeae1ab060f
+	github.com/wearespindle/proxmox-api-go v0.0.0-20211022120806-a5044810e206
 	github.com/zclconf/go-cty v1.9.1 // indirect
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect

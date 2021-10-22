@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/Telmate/terraform-provider-proxmox/proxmox"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/wearespindle/terraform-provider-proxmox/proxmox"
 	"log"
 )
 
@@ -23,7 +23,7 @@ func main() {
 	}
 
 	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/telmate/proxmox", opts)
+		err := plugin.Debug(context.Background(), "registry.terraform.io/wearespindle/proxmox", opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
