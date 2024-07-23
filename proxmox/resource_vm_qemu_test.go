@@ -1,8 +1,10 @@
 package proxmox
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -397,4 +399,43 @@ func TestAccProxmoxVmQemu_UpdateRebootRequired(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testResourceExampleInstanceStateDataV0() map[string]any {
+	return map[string]any{
+		"disk": []map[string]any{
+			{
+				"backup": 0,
+			},
+			{
+				"backup": 1,
+			},
+		},
+	}
+}
+
+func testResourceExampleInstanceStateDataV1() map[string]any {
+	// v0 := testResourceExampleInstanceStateDataV0()
+	return map[string]any{
+		"disk": []map[string]any{
+			{
+				"backup": false,
+			},
+			{
+				"backup": true,
+			},
+		},
+	}
+}
+
+func TestResourceExampleInstanceStateUpgradeV0(t *testing.T) {
+	expected := testResourceExampleInstanceStateDataV1()
+	actual, err := resourceVmQemuStateUpgradeV0(context.Background(), testResourceExampleInstanceStateDataV0(), nil)
+	if err != nil {
+		t.Fatalf("error migrating state: %s", err)
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("\n\nexpected:\n\n%#v\n\ngot:\n\n%#v\n\n", expected, actual)
+	}
 }

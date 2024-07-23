@@ -822,7 +822,15 @@ func resourceVmQemu() *schema.Resource {
 				Description: "Automatically reboot the VM if any of the modified parameters requires a reboot to take effect.",
 			},
 		},
-		Timeouts: resourceTimeouts(),
+		Timeouts:      resourceTimeouts(),
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceVmQemuV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceVmQemuStateUpgradeV0,
+				Version: 0,
+			},
+		},
 	}
 	return thisResource
 }
@@ -1594,9 +1602,7 @@ func _resourceVmQemuRead(d *schema.ResourceData, meta interface{}) error {
 		// backup is default true but state must be set!
 		if qemuDisk["backup"] == "" || qemuDisk["backup"] == nil {
 			qemuDisk["backup"] = true
-		} // else if qemuDisk["backup"] == true {
-		// 	qemuDisk["backup"] = 1
-		// }
+		}
 	}
 
 	flatDisks, _ := FlattenDevicesList(config.QemuDisks)
