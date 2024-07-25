@@ -199,7 +199,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		"Pool.Allocate",
 		"Sys.Audit",
 		"Sys.Console",
-		"Sys.Modify",
+		// "Sys.Modify",
 		"VM.Allocate",
 		"VM.Audit",
 		"VM.Clone",
